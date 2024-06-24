@@ -4,6 +4,7 @@ from infer_florence_2_ocr.infer_florence_2_ocr_process import InferFlorence2OcrP
 
 # PyQt GUI framework
 from PyQt5.QtWidgets import *
+from torch.cuda import is_available
 
 
 # --------------------
