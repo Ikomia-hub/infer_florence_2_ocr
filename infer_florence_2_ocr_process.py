@@ -236,6 +236,7 @@ class InferFlorence2OcrFactory(dataprocess.CTaskFactory):
         self.info.keywords = "Florence,Microsoft,Captioning,Unified,Pytorch"
         self.info.algo_type = core.AlgoType.INFER
         self.info.algo_tasks = "OCR"
+        self.info.os = utils.OSType.LINUX
 
     def create(self, param=None):
         # Create algorithm object
