@@ -22,7 +22,7 @@
 Florence-2 is an advanced vision foundation model that uses a prompt-based approach to handle a wide range of vision and vision-language tasks. 
 In this algorithm you can use Florence-2 for text recognition (OCR). 
 
-![ocr illustration](https://raw.githubusercontent.com/Ikomia-hub/infer_florance_2_ocr/main/images/output.jpg)
+![ocr illustration](https://raw.githubusercontent.com/Ikomia-hub/infer_florence_2_ocr/main/images/output.jpg)
 
 
 
