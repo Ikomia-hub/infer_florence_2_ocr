@@ -24,7 +24,8 @@ class InferFlorence2OcrParam(core.CWorkflowTaskParam):
 
     def set_values(self, params):
         # Set parameters values from Ikomia Studio or API
-        self.update = utils.strtobool(params["cuda"]) != self.cuda or self.model_name != str(params["model_name"])
+        self.update = utils.strtobool(
+            params["cuda"]) != self.cuda or self.model_name != str(params["model_name"])
         self.model_name = str(params["model_name"])
         self.max_new_tokens = int(params["max_new_tokens"])
         self.num_beams = int(params["num_beams"])
@@ -49,6 +50,8 @@ class InferFlorence2OcrParam(core.CWorkflowTaskParam):
 # - Class which implements the algorithm
 # - Inherits PyCore.CWorkflowTask or derived from Ikomia API
 # --------------------
+
+
 class InferFlorence2Ocr(dataprocess.C2dImageTask):
 
     def __init__(self, name, param):
@@ -64,7 +67,8 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
 
         self.processor = None
         self.model = None
-        self.model_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "weights")
+        self.model_folder = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "weights")
         self.device = torch.device("cpu")
         self.task_prompt = '<OCR_WITH_REGION>'
         self.color = [255, 0, 0]
@@ -77,61 +81,62 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
     def load_model(self, param):
         try:
             self.processor = AutoProcessor.from_pretrained(
-                                    param.model_name,
-                                    cache_dir=self.model_folder,
-                                    local_files_only=True,
-                                    trust_remote_code=True
-                                    )
+                param.model_name,
+                cache_dir=self.model_folder,
+                local_files_only=True,
+                trust_remote_code=True
+            )
 
             self.model = AutoModelForCausalLM.from_pretrained(
-                                    param.model_name,
-                                    cache_dir=self.model_folder,
-                                    local_files_only=True,
-                                    trust_remote_code=True
-                                    ).eval()
+                param.model_name,
+                cache_dir=self.model_folder,
+                local_files_only=True,
+                trust_remote_code=True
+            ).eval()
 
         except Exception as e:
-            print(f"Failed with error: {e}. Trying without the local_files_only parameter...")
+            print(
+                f"Failed with error: {e}. Trying without the local_files_only parameter...")
             self.processor = AutoProcessor.from_pretrained(
-                                        param.model_name,
-                                        cache_dir=self.model_folder,
-                                        trust_remote_code=True
-                                        )
+                param.model_name,
+                cache_dir=self.model_folder,
+                trust_remote_code=True
+            )
 
             self.model = AutoModelForCausalLM.from_pretrained(
-                                    param.model_name,
-                                    cache_dir=self.model_folder,
-                                    trust_remote_code=True
-                                    ).eval()
+                param.model_name,
+                cache_dir=self.model_folder,
+                trust_remote_code=True
+            ).eval()
         self.model.to(self.device)
 
     def infer(self, img, param):
         # Image pre-process
         img_h, img_w = img.shape[:2]
         inputs = self.processor(
-                        text=self.task_prompt,
-                        images=img,
-                        return_tensors="pt"
-                    ).to(self.device)
+            text=self.task_prompt,
+            images=img,
+            return_tensors="pt"
+        ).to(self.device)
 
         # Inference
         generated_ids = self.model.generate(
-                                    input_ids=inputs["input_ids"],
-                                    pixel_values=inputs["pixel_values"],
-                                    max_new_tokens=param.max_new_tokens,
-                                    early_stopping=param.early_stopping,
-                                    do_sample=param.do_sample,
-                                    num_beams=param.num_beams,
-                                    )
+            input_ids=inputs["input_ids"],
+            pixel_values=inputs["pixel_values"],
+            max_new_tokens=param.max_new_tokens,
+            early_stopping=param.early_stopping,
+            do_sample=param.do_sample,
+            num_beams=param.num_beams,
+        )
         generated_text = self.processor.batch_decode(
-                                            generated_ids,
-                                            skip_special_tokens=False
-                                            )[0]
+            generated_ids,
+            skip_special_tokens=False
+        )[0]
         parsed_answer = self.processor.post_process_generation(
-                                            generated_text,
-                                            task=self.task_prompt,
-                                            image_size=(img_w, img_h)
-                                            )
+            generated_text,
+            task=self.task_prompt,
+            image_size=(img_w, img_h)
+        )
 
         return parsed_answer
 
@@ -172,13 +177,14 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
         bboxes, labels = prediction['quad_boxes'], prediction['labels']
 
         # Edit the first label
-        if len(labels)>0 and '</s>' in labels[0]:
+        if len(labels) > 0 and '</s>' in labels[0]:
             labels[0] = labels[0].replace('</s>', '')
 
         for i, (text_box, label) in enumerate(zip(bboxes, labels)):
             # text_box contains 8 values: [x1, y1, x2, y2, x3, y3, x4, y4]
             # Convert to numpy array for easier manipulation
-            box = np.array(text_box).reshape(-1, 2)  # Reshape to (4, 2) for four points
+            # Reshape to (4, 2) for four points
+            box = np.array(text_box).reshape(-1, 2)
 
             # Calculate bounding box: take the min and max coordinates
             x_min, y_min = np.min(box, axis=0)
@@ -190,15 +196,15 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
 
             # Add text graphics object
             text_output.add_text_field(
-                            id=i,
-                            label="",
-                            text=label,
-                            confidence=1,
-                            box_x=x_min,
-                            box_y=y_min,
-                            box_width=w,
-                            box_height=h,
-                            color=self.color
+                id=i,
+                label="",
+                text=label,
+                confidence=1,
+                box_x=x_min,
+                box_y=y_min,
+                box_width=w,
+                box_height=h,
+                color=self.color
             )
 
         # Step progress bar (Ikomia Studio):
@@ -211,6 +217,8 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
 # - Factory class to build process object
 # - Inherits PyDataProcess.CTaskFactory from Ikomia API
 # --------------------
+
+
 class InferFlorence2OcrFactory(dataprocess.CTaskFactory):
 
     def __init__(self):
@@ -220,7 +228,7 @@ class InferFlorence2OcrFactory(dataprocess.CTaskFactory):
         self.info.short_description = "Inference for text recognition (OCR) with Florence-2"
         # relative path -> as displayed in Ikomia Studio algorithm tree
         self.info.path = "Plugins/Python/OCR"
-        self.info.version = "1.0.0"
+        self.info.version = "2.0.0"
         self.info.icon_path = "images/icon.png"
         self.info.authors = "B. Xiao, H. Wu, W. Xu, X. Dai, H. Hu, Y. Lu, M. Zeng, C. Liu, L. Yuan"
         self.info.article = "Florence-2: Advancing a Unified Representation for a Variety of Vision Tasks"
@@ -231,7 +239,8 @@ class InferFlorence2OcrFactory(dataprocess.CTaskFactory):
         self.info.repository = "https://github.com/Ikomia-hub/infer_florence_2_caption"
         self.info.original_repository = "https://github.com/googleapis/python-vision"
         # Python version
-        self.info.min_python_version = "3.10.0"
+        self.info.min_python_version = "3.11.0"
+        self.info.min_ikomia_version = "0.15.0"
         # Keywords used for search
         self.info.keywords = "Florence,Microsoft,Captioning,Unified,Pytorch"
         self.info.algo_type = core.AlgoType.INFER
