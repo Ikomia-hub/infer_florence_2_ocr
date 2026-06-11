@@ -3,7 +3,8 @@ import torch
 import os
 import numpy as np
 from ikomia import core, dataprocess, utils
-from transformers import AutoProcessor, AutoModelForCausalLM
+from ikomia.dataprocess.datadictIO import DataDictIO
+from transformers import AutoProcessor, Florence2ForConditionalGeneration
 
 
 # --------------------
@@ -14,7 +15,7 @@ class InferFlorence2OcrParam(core.CWorkflowTaskParam):
 
     def __init__(self):
         core.CWorkflowTaskParam.__init__(self)
-        self.model_name = 'microsoft/Florence-2-large'
+        self.model_name = 'florence-community/Florence-2-large'
         self.max_new_tokens = 1024
         self.num_beams = 3
         self.do_sample = False
@@ -57,7 +58,7 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
     def __init__(self, name, param):
         dataprocess.C2dImageTask.__init__(self, name)
         self.add_output(dataprocess.CTextIO())
-        self.add_output(dataprocess.DataDictIO())
+        self.add_output(DataDictIO())
 
         # Create parameters object
         if param is None:
@@ -87,7 +88,7 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
                 trust_remote_code=True
             )
 
-            self.model = AutoModelForCausalLM.from_pretrained(
+            self.model = Florence2ForConditionalGeneration.from_pretrained(
                 param.model_name,
                 cache_dir=self.model_folder,
                 local_files_only=True,
@@ -103,7 +104,7 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
                 trust_remote_code=True
             )
 
-            self.model = AutoModelForCausalLM.from_pretrained(
+            self.model = Florence2ForConditionalGeneration.from_pretrained(
                 param.model_name,
                 cache_dir=self.model_folder,
                 trust_remote_code=True
@@ -196,15 +197,15 @@ class InferFlorence2Ocr(dataprocess.C2dImageTask):
 
             # Add text graphics object
             text_output.add_text_field(
-                id=i,
-                label="",
-                text=label,
-                confidence=1,
-                box_x=x_min,
-                box_y=y_min,
-                box_width=w,
-                box_height=h,
-                color=self.color
+                int(i),
+                "",
+                str(label),
+                float(1),
+                float(x_min),
+                float(y_min),
+                float(w),
+                float(h),
+                [int(c) for c in self.color]
             )
 
         # Step progress bar (Ikomia Studio):
@@ -228,7 +229,7 @@ class InferFlorence2OcrFactory(dataprocess.CTaskFactory):
         self.info.short_description = "Inference for text recognition (OCR) with Florence-2"
         # relative path -> as displayed in Ikomia Studio algorithm tree
         self.info.path = "Plugins/Python/OCR"
-        self.info.version = "2.0.0"
+        self.info.version = "3.0.0"
         self.info.icon_path = "images/icon.png"
         self.info.authors = "B. Xiao, H. Wu, W. Xu, X. Dai, H. Hu, Y. Lu, M. Zeng, C. Liu, L. Yuan"
         self.info.article = "Florence-2: Advancing a Unified Representation for a Variety of Vision Tasks"
@@ -237,10 +238,9 @@ class InferFlorence2OcrFactory(dataprocess.CTaskFactory):
         self.info.license = "MIT License"
         # Code source repository
         self.info.repository = "https://github.com/Ikomia-hub/infer_florence_2_caption"
-        self.info.original_repository = "https://github.com/googleapis/python-vision"
         # Python version
         self.info.min_python_version = "3.11.0"
-        self.info.min_ikomia_version = "0.15.0"
+        self.info.min_ikomia_version = "0.16.1"
         # Keywords used for search
         self.info.keywords = "Florence,Microsoft,Captioning,Unified,Pytorch"
         self.info.algo_type = core.AlgoType.INFER

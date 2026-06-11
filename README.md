@@ -65,10 +65,10 @@ Ikomia Studio offers a friendly UI with the same features as the API.
 - For additional guidance on getting started with Ikomia Studio, check out [this blog post](https://www.ikomia.ai/blog/how-to-get-started-with-ikomia-studio).
 
 ## :pencil: Set algorithm parameters
-- **model_name** (str) - default 'microsoft/Florence-2-base': Name of the Florence-2 pre-trained model. Other models available:
-    - microsoft/Florence-2-large
-    - microsoft/Florence-2-base-ft
-    - microsoft/Florence-2-large-ft
+- **model_name** (str) - default 'florence-community/Florence-2-base': Name of the Florence-2 pre-trained model. Other models available:
+    - florence-community/Florence-2-large
+    - florence-community/Florence-2-base-ft
+    - florence-community/Florence-2-large-ft
 - **num_beams** (int) - default '3': By specifying a number of beams higher than 1, you are effectively switching from greedy search to beam search. This strategy evaluates several hypotheses at each time step and eventually chooses the hypothesis that has the overall highest probability for the entire sequence. This has the advantage of identifying high-probability sequences that start with a lower probability initial tokens and would’ve been ignored by the greedy search. 
 - **do_sample** (bool) - default 'False': If set to True, this parameter enables decoding strategies such as multinomial sampling, beam-search multinomial sampling, Top-K sampling and Top-p sampling. All these strategies select the next token from the probability distribution over the entire vocabulary with various strategy-specific adjustments.
 - **early_stopping** (bool) - default 'False': Controls the stopping condition for beam-based methods, like beam-search. It accepts the following values: True, where the generation stops as soon as there are num_beams complete candidates; False, where an heuristic is applied and the generation stops when is it very unlikely to find better candidates; "never", where the beam search procedure only stops when there cannot be better candidates (canonical beam search algorithm).
@@ -89,7 +89,7 @@ wf = Workflow()
 algo = wf.add_task(name="infer_florence_2_ocr", auto_connect=True)
 
 algo.set_parameters({
-    "model_name":"microsoft/Florence-2-large",
+    "model_name":"florence-community/Florence-2-large",
     "max_new_tokens":"1024",
     "num_beams":"3",
     "do_sample":"False",

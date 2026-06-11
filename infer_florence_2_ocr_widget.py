@@ -3,7 +3,7 @@ from ikomia.utils import pyqtutils, qtconversion
 from infer_florence_2_ocr.infer_florence_2_ocr_process import InferFlorence2OcrParam
 
 # PyQt GUI framework
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 from torch.cuda import is_available
 
 
@@ -35,10 +35,10 @@ class InferFlorence2OcrWidget(core.CWorkflowTaskWidget):
         # Model name
         self.combo_model = pyqtutils.append_combo(
             self.grid_layout, "Model name")
-        self.combo_model.addItem("microsoft/Florence-2-base")
-        self.combo_model.addItem("microsoft/Florence-2-large")
-        self.combo_model.addItem("microsoft/Florence-2-base-ft")
-        self.combo_model.addItem("microsoft/Florence-2-large-ft")
+        self.combo_model.addItem("florence-community/Florence-2-base")
+        self.combo_model.addItem("florence-community/Florence-2-large")
+        self.combo_model.addItem("florence-community/Florence-2-base-ft")
+        self.combo_model.addItem("florence-community/Florence-2-large-ft")
 
         self.combo_model.setCurrentText(self.parameters.model_name)
 
